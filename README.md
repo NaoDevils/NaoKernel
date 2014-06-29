@@ -165,7 +165,7 @@ The new driver can be found in `drivers/media/video/mt9m114.ko` and has to be co
 
 Some infos on how to build gcc 4.5.3
 ------------------------------------
-A complete guide on how to build gcc can be found in the [Code Release 2013](https://github.com/bhuman/BHuman2013/blob/master/CodeRelease2013.pdf]). Although the guide was originally written for gcc 4.5.2 it is pretty much the same for gcc 4.5.3, thus you will find a short version here:
+A complete guide on how to build gcc can be found in the [Code Release 2013](https://github.com/bhuman/BHuman2013/blob/master/CodeRelease2013.pdf). Although the guide was originally written for gcc 4.5.2 it is pretty much the same for gcc 4.5.3, thus you will find a short version here:
 * Download gcc 4.5.3 from http://gcc.gnu.org/gcc-4.5/ and unpack it to a directory of your chioce.
 * Apply the patches from https://github.com/bhuman/BHuman2013/tree/master/Util/gcc-patch .
 * Download the the libraries mpfr and mpc and unpack them into the source directory (make sure, that the mpfr and mpc directories are named "mpfr" and "mpc").
