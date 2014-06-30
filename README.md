@@ -1,6 +1,6 @@
 BKernel
 =======
-This is essentially [Aldebaran's 2.0 Kernel](https://github.com/aldebaran/linux-aldebaran/tree/release-2.0/atom) with a new camera driver. Other then that nothing else was modified.
+This is essentially [Aldebaran's 2.0 Kernel](https://github.com/aldebaran/linux-aldebaran/tree/release-2.0/atom) with a new camera driver. Other than that nothing else was modified.
 
 Information about the camera driver
 -----------------------------------
@@ -159,7 +159,7 @@ Before you build the kernel make sure gcc 4.5.3 is used by default. This can be 
 
 To speed up the build process you can use the `-j <number of cores>` command with the number of cores your PC has.
 
-Since nothing was modified on the kernel expect for the camera driver you can just copy the module to the robot and restart it.
+Since nothing was modified on the kernel except for the camera driver you can just copy the module to the robot and restart it.
 
 The new driver can be found in `drivers/media/video/mt9m114.ko` and has to be copied to `/lib/modules/2.6.33.9-rt31-aldebaran-rt/kernel/drivers/media/video/mt9m114.ko`.
 
