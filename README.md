@@ -2,6 +2,8 @@ BKernel
 =======
 This is essentially [Aldebaran's 2.0 Kernel](https://github.com/aldebaran/linux-aldebaran/tree/release-2.0/atom) with a new camera driver. Other than that nothing else was modified.
 
+**Be aware** that if you are using NAO OS 2.1 you will have to copy the .config file from the NAO. Otherwise the cam driver can not be loaded!
+
 Information about the camera driver
 -----------------------------------
 The camera driver provides some new features compared to the driver from Aldebaran. In addition to that the range of some values changed and the auto white balance is controlled by another ioctl.
@@ -69,10 +71,10 @@ A list of all supported mage settings:
         <td>Gradient of the contrast adjustment curve from 0.5 (16) to 2.0 (64)</td>
     </tr>
     <tr>
-        <td>*NEW* do an automatic white balance</td>
+        <td>NEW<br/>do an automatic white balance</td>
         <td>V4L2_CID_DO_WHITE_BALANCE</td>
         <td>min 0: max: 1<br/>default: 0</td>
-        <td>Does an automatic white balance. The new white balance can be read from the white balance temperature.<br/>This ioctl is a button, thus it will always return 0! *Be aware* that Aldebaran uses this ioctl for the white balance temperature.</td>
+        <td>Does an automatic white balance. The new white balance can be read from the white balance temperature.<br/>This ioctl is a button, thus it will always return 0! **Be aware** that Aldebaran uses this ioctl for the white balance temperature.</td>
     </tr>
     <tr>
         <td>exposure time</td>
@@ -93,7 +95,7 @@ A list of all supported mage settings:
         <td>Only changeable while ae is disabled! A value of 32 equals to 1.0 gain.</td>
     </tr>
     <tr>
-        <td>*NEW* gamma</td>
+        <td>NEW<br/>gamma correction</td>
         <td>V4L2_CID_GAMMA</td>
         <td>min 0: max: 1000<br/>default: 220</td>
         <td>The gamma correction for the display in units multiplied by 100. A value of 220 equals to 2.2 gamma.</td>
@@ -105,7 +107,7 @@ A list of all supported mage settings:
         <td>Hue correction on degrees.</td>
     </tr>
     <tr>
-        <td>*NEW* power line frequency</td>
+        <td>NEW<br/>power line frequency</td>
         <td>V4L2_CID_POWER_LINE_FREQUENCY</td>
         <td>min 1: max: 2<br/>default: 2</td>
         <td>1: 50Hz, 2: 60Hz.<br/>The frequeny of the local power line so ae can avoid flicker.</td>
@@ -126,7 +128,7 @@ A list of all supported mage settings:
         <td>white balance temperature</td>
         <td>V4L2_CID_WHITE_BALANCE_TEMPERATURE</td>
         <td>min 2700: max: 6500<br/>default: 6500</td>
-        <td>The white balance temperature in kelvin. *Be aware* that Aldebaran uses another ioctl for this feature!</td>
+        <td>The white balance temperature in kelvin. **Be aware** that Aldebaran uses another ioctl for this feature!</td>
     </tr>
     <tr>
         <td>vertical flip</td>
@@ -141,7 +143,7 @@ A list of all supported mage settings:
         <td></td>
     </tr>
     <tr>
-        <td>*NEW* fade to black</td>
+        <td>NEW<br/>fade to black</td>
         <td>V4L2_CID_PRIVATE_BASE</td>
         <td>min 0: max: 1<br/>default: 1</td>
         <td>0: disable, 1: enable<br/>When enabled the image will fade to black under low light conditions.</td>
