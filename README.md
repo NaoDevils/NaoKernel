@@ -1,14 +1,16 @@
 BKernel
 =======
-This is essentially [Aldebaran's 2.0 Kernel](https://github.com/aldebaran/linux-aldebaran/tree/release-2.0/atom) with a new camera driver. Other than that nothing else was modified.
+This is essentially [Aldebaran's 2.0 Kernel](https://github.com/aldebaran/linux-aldebaran/tree/release-2.0/atom) with a new camera driver and an alternative for the build in ethernet driver. Other than that nothing else was modified.
 
-**Be aware** that if you are using NAO OS 2.1 you will have to copy the .config file from the NAO. Otherwise the cam driver can not be loaded!
+**Be aware** that you may need to update the .config file depending on the NAO OS you are using. The current file is from NAO OS 2.1.0. The config file can be found in /proc/config.bz. Make shure to rename it to .config.
 
 Information about the camera driver
 -----------------------------------
 The camera driver provides some new features compared to the driver from Aldebaran. In addition to that the range of some values changed and the auto white balance is controlled by another ioctl.
 
-A list of the new video controls
+After building the kernel the new driver can be found in `drivers/media/video/mt9m114.ko` and has to be copied to `/lib/modules/2.6.33.9-rt31-aldebaran-rt/kernel/drivers/media/video/mt9m114.ko` on the robot.
+
+A list of the new video controls:
 <table>
     <tr>
         <td>Feature</td>
@@ -150,28 +152,42 @@ A list of all supported mage settings:
     </tr>
 </table>
 
+Information about the alternative ethernet driver
+-------------------------------------------------
+Aldebran has the r8169 driver build into their kernels. [This driver does not work correctly, even system crashes are possible!](http://wiki.hetzner.de/index.php/Installation_des_r8168-Treibers/en). We added the r8168 driver which is provided by [Realtek](http://www.realtek.com.tw/downloads/downloadsView.aspx?Langid=1&PNid=13&PFid=5&Level=5&Conn=4&DownTypeID=3&GetDown=false).
+
+Since the r8169 driver is build into the kernel it is a bit more difficult than usual to replace it. You can either replace the whole kernel, or switch to the new driver while booting.
+### Replacing the kernel (in theory)
+1. Deactivate the r8169 driver in the .config file by replacing the line `CONFIG_R8169=y` by `# CONFIG_R8169 is not set` (deleting this line should do the trick, too).
+2. Activate the r8168 driver: In case you had to replace the .config file, you have to add either `CONFIG_R8168=y` (to build the driver into the kernel) or `CONFIG_R8168=m` (to build it as a module).
+3. Build the kernel. You can use the `tarbz2-pkg` option to have the kernel and all its modules packed into a tar.bz2 archive.
+4. Replace the kernel on the robot.
+
+### Switching the driver during boot
+1. Activate the r8168 driver: In case you had to replace the .config file, you have to add `CONFIG_R8168=m` to build it as a module.
+2. Build the kernel.
+3. Copy the driver to the Robot: The new driver can be found in `drivers/net/r8168-8.039.00/r8168.ko` and has to be copied to `/lib/modules/2.6.33.9-rt31-aldebaran-rt/kernel/drivers/net/r8168.ko`.
+4. Write an init.d script that switches out the drivers. We use a script similar to this one:
+```
+depend() {
+  need dbus
+}
+
+start() {
+  # Replace buggy driver
+  networkDriver=$(lspci -k -s 02:00.0 | grep "Kernel driver in use:" | awk 'NF>1{print $NF}')
+  if [[ ${networkDriver} == "r8169" ]] ; then
+    echo "0000:02:00.0" > /sys/bus/pci/drivers/r8169/unbind
+    insmod /lib/modules/2.6.33.9-rt31-aldebaran-rt/kernel/drivers/net/r8168.ko
+  fi
+
+  ifconfig eth0 up
+}
+```
+
 How to build the kernel
-------------
-To build this kernel gcc 4.5.3 is needed. If you are lucky your Linux distribution has a package for that gcc version. Otherwise you have to build it yourself. For more information on that topic see [down below](README.md#some-infos-on-how-to-build-gcc-453).
-The .config file was loaded from the NAOs and is included in this repository. So no further configuration is needed.
+-----------------------
+The easiest way to build the kernel is to us Aldebrans VirtualBox image provided with each NAO OS release.
+After importing it into VirtualBox you can change the number of CPUs and the amount of RAM to your liking, in order to spead up the compilation. Copying data from and to the VM can be done via `scp -P 2222 nao@localhost`. Similarly ssh can be used which preserves your keybord layout: `ssh -p 2222 nao@localhost`.
 
-Before you build the kernel make sure gcc 4.5.3 is used by default. This can be done by adding the path to gcc's bin directory to the front of your $PATH environment variable. Then to build the kernel just type in:
-
-    make ARCH=i386
-
-To speed up the build process you can use the `-j <number of cores>` command with the number of cores your PC has.
-
-Since nothing was modified on the kernel except for the camera driver you can just copy the module to the robot and restart it.
-
-The new driver can be found in `drivers/media/video/mt9m114.ko` and has to be copied to `/lib/modules/2.6.33.9-rt31-aldebaran-rt/kernel/drivers/media/video/mt9m114.ko`.
-
-Some infos on how to build gcc 4.5.3
-------------------------------------
-A complete guide on how to build gcc can be found in the [Code Release 2013](https://github.com/bhuman/BHuman2013/blob/master/CodeRelease2013.pdf). Although the guide was originally written for gcc 4.5.2 it is pretty much the same for gcc 4.5.3, thus you will find a short version here:
-* Download gcc 4.5.3 from http://gcc.gnu.org/gcc-4.5/ and unpack it to a directory of your chioce.
-* Apply the patches from https://github.com/bhuman/BHuman2013/tree/master/Util/gcc-patch .
-* Download the the libraries mpfr and mpc and unpack them into the source directory (make sure, that the mpfr and mpc directories are named "mpfr" and "mpc").
-* Create a build directory
-* Run `<path to gcc source>/configure --prefix=/home/user/gcc-4.5.2 --enable-languages=c,c++`
-* Run `make -j 4`
-* Run `make install`
+Once you copied the source files to the VM run `make`. To speed up the build process you can use the `-j <number of cores>` command with the number of CPUs you gave the VM.
