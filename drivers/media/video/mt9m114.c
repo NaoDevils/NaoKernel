@@ -706,6 +706,58 @@ static int mt9m114_g_fade_to_black(struct v4l2_subdev* sd, s32* val) {
   return ret;
 }
 
+static int mt9m114_g_target_average_luma(struct v4l2_subdev* sd, s32* val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  u8 val8;
+  int ret = mt9m114_read8(client, VAR_CAM_AET_TARGET_AVERAGE_LUMA, &val8);
+  *val = (s8)val8;
+  return ret;
+}
+
+static int mt9m114_g_target_average_luma_dark(struct v4l2_subdev* sd, s32* val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  u8 val8;
+  int ret = mt9m114_read8(client, VAR_CAM_AET_TARGET_AVERAGE_LUMA_DARK, &val8);
+  *val = (s8)val8;
+  return ret;
+}
+
+static int mt9m114_g_target_gain(struct v4l2_subdev* sd, s32* val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  u16 val16;
+  int ret = mt9m114_read16(client, VAR_CAM_AET_TARGET_GAIN, &val16);
+  *val = (s16)val16;
+  return ret;
+}
+
+static int mt9m114_g_min_virt_gain(struct v4l2_subdev* sd, s32* val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  u16 val16;
+  int ret = mt9m114_read16(client, VAR_CAM_AET_AE_MIN_VIRT_AGAIN, &val16);
+  *val = (s16)val16;
+  return ret;
+}
+
+static int mt9m114_g_max_virt_gain(struct v4l2_subdev* sd, s32* val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  u16 val16;
+  int ret = mt9m114_read16(client, VAR_CAM_AET_AE_MAX_VIRT_AGAIN, &val16);
+  *val = (s16)val16;
+  return ret;
+}
+
+static int mt9m114_g_weight_table(struct v4l2_subdev* sd, s32* val, char pos) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  u8 val8;
+  int ret;
+  
+  if(pos < 0 || pos >= 25) return -EINVAL;
+  
+  ret = mt9m114_read8(client, VAR_AE_RULE_AE_WEIGHT_TABLE_0_0+pos, &val8);
+  *val = (s8)val8;
+  return ret;
+}
+
 static int mt9m114_s_auto_exposure(struct v4l2_subdev* sd, s32 val) {
   // When ae is disabled (mode 0 or 2) the values of frame interval, exposure
   // and gain will be set to the ones used while ae was enabled (mode 1 or 3)!
@@ -1017,6 +1069,74 @@ static int mt9m114_s_fade_to_black(struct v4l2_subdev* sd, s32 val) {
   return ret;
 }
 
+static int mt9m114_s_target_average_luma(struct v4l2_subdev* sd, s32 val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  int ret;
+
+  iprint("Setting target average brightness to %d", val);
+  ret = mt9m114_write8(client, VAR_CAM_AET_TARGET_AVERAGE_LUMA, val);
+  if(!ret) ret = mt9m114_wait_for_vertical_blanking(client);
+  if(!ret) ret = mt9m114_refresh(client);
+  return ret;
+}
+
+static int mt9m114_s_target_average_luma_dark(struct v4l2_subdev* sd, s32 val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  int ret;
+
+  iprint("Setting target average brightness dark to %d", val);
+  ret = mt9m114_write8(client, VAR_CAM_AET_TARGET_AVERAGE_LUMA_DARK, val);
+  if(!ret) ret = mt9m114_wait_for_vertical_blanking(client);
+  if(!ret) ret = mt9m114_refresh(client);
+  return ret;
+}
+
+static int mt9m114_s_target_gain(struct v4l2_subdev* sd, s32 val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  int ret;
+
+  iprint("Setting target gain to %d", val);
+  ret = mt9m114_write16(client, VAR_CAM_AET_TARGET_GAIN, val);
+  if(!ret) ret = mt9m114_wait_for_vertical_blanking(client);
+  if(!ret) ret = mt9m114_refresh(client);
+  return ret;
+}
+
+static int mt9m114_s_min_virt_gain(struct v4l2_subdev* sd, s32 val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  int ret;
+
+  iprint("Setting minimum virtual gain to %d", val);
+  ret = mt9m114_write16(client, VAR_CAM_AET_AE_MIN_VIRT_AGAIN, val);
+  if(!ret) ret = mt9m114_wait_for_vertical_blanking(client);
+  if(!ret) ret = mt9m114_refresh(client);
+  return ret;
+}
+
+static int mt9m114_s_max_virt_gain(struct v4l2_subdev* sd, s32 val) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  int ret;
+
+  iprint("Setting maximum virtual gain to %d", val);
+  ret = mt9m114_write16(client, VAR_CAM_AET_AE_MAX_VIRT_AGAIN, val);
+  if(!ret) ret = mt9m114_wait_for_vertical_blanking(client);
+  if(!ret) ret = mt9m114_refresh(client);
+  return ret;
+}
+
+static int mt9m114_s_weight_table(struct v4l2_subdev* sd, s32 val, char pos) {
+  struct i2c_client* client = v4l2_get_subdevdata(sd);
+  int ret;
+  
+  if(pos < 0 || pos >= 25) return -EINVAL;
+
+  iprint("Setting weight table at %d to %d", pos, val);
+  ret = mt9m114_write8(client, VAR_AE_RULE_AE_WEIGHT_TABLE_0_0+pos, val);
+  if(!ret) ret = mt9m114_wait_for_vertical_blanking(client);
+  if(!ret) ret = mt9m114_refresh(client);
+  return ret;
+}
+
 static const struct mt9m114_fmt* mt9m114_find_best_fmt(u32 pixelformat) {
   int i;
   for(i = 0; i < MT9M114_NUM_FMTS; ++i) {
@@ -1255,6 +1375,90 @@ static int mt9m114_queryctrl(struct v4l2_subdev* sd, struct v4l2_queryctrl* qctr
       qctrl->type = V4L2_CTRL_TYPE_BOOLEAN;
       qctrl->flags = 0;
       return 0;
+    case V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA:
+      qctrl->minimum = 0;
+      qctrl->maximum = 255;
+      qctrl->step = 1;
+      qctrl->default_value = 55;
+      qctrl->reserved[0] = qctrl->reserved[1] = 0;
+      strcpy(qctrl->name, "AE target average brightness");
+      qctrl->type = V4L2_CTRL_TYPE_INTEGER;
+      qctrl->flags = 0;
+      return 0;
+    case V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA_DARK:
+      qctrl->minimum = 0;
+      qctrl->maximum = 255;
+      qctrl->step = 1;
+      qctrl->default_value = 27;
+      qctrl->reserved[0] = qctrl->reserved[1] = 0;
+      strcpy(qctrl->name, "AE target average brightn. dark");
+      qctrl->type = V4L2_CTRL_TYPE_INTEGER;
+      qctrl->flags = 0;
+      return 0;
+    case V4L2_MT9M114_AE_TARGET_GAIN:
+      qctrl->minimum = 0;
+      qctrl->maximum = 65535;
+      qctrl->step = 1;
+      qctrl->default_value = 128;
+      qctrl->reserved[0] = qctrl->reserved[1] = 0;
+      strcpy(qctrl->name, "AE target analog gain");
+      qctrl->type = V4L2_CTRL_TYPE_INTEGER;
+      qctrl->flags = 0;
+      return 0;
+    case V4L2_MT9M114_AE_MIN_VIRT_GAIN:
+      qctrl->minimum = 0;
+      qctrl->maximum = 65535;
+      qctrl->step = 1;
+      qctrl->default_value = 32;
+      qctrl->reserved[0] = qctrl->reserved[1] = 0;
+      strcpy(qctrl->name, "AE min permitted analog gain");
+      qctrl->type = V4L2_CTRL_TYPE_INTEGER;
+      qctrl->flags = 0;
+      return 0;
+    case V4L2_MT9M114_AE_MAX_VIRT_GAIN:
+      qctrl->minimum = 0;
+      qctrl->maximum = 65535;
+      qctrl->step = 1;
+      qctrl->default_value = 256;
+      qctrl->reserved[0] = qctrl->reserved[1] = 0;
+      strcpy(qctrl->name, "AE max permitted analog gain");
+      qctrl->type = V4L2_CTRL_TYPE_INTEGER;
+      qctrl->flags = 0;
+      return 0;
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_4:
+      qctrl->minimum = 0;
+      qctrl->maximum = 100;
+      qctrl->step = 1;
+      qctrl->default_value = 100;
+      qctrl->reserved[0] = qctrl->reserved[1] = 0;
+      strcpy(qctrl->name, "AE weight table");
+      qctrl->type = V4L2_CTRL_TYPE_INTEGER;
+      qctrl->flags = 0;
+      return 0;
     default:
       return -EINVAL;
   }
@@ -1299,6 +1503,42 @@ static int mt9m114_g_ctrl(struct v4l2_subdev* sd, struct v4l2_control* ctrl) {
       return mt9m114_g_horizontal_flip(sd, &ctrl->value);
     case V4L2_MT9M114_FADE_TO_BLACK:
       return mt9m114_g_fade_to_black(sd, &ctrl->value);
+    case V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA:
+      return mt9m114_g_target_average_luma(sd, &ctrl->value);
+    case V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA_DARK:
+      return mt9m114_g_target_average_luma_dark(sd, &ctrl->value);
+    case V4L2_MT9M114_AE_TARGET_GAIN:
+      return mt9m114_g_target_gain(sd, &ctrl->value);
+    case V4L2_MT9M114_AE_MIN_VIRT_GAIN:
+      return mt9m114_g_min_virt_gain(sd, &ctrl->value);
+    case V4L2_MT9M114_AE_MAX_VIRT_GAIN:
+      return mt9m114_g_max_virt_gain(sd, &ctrl->value);
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_4:
+      return mt9m114_g_weight_table(sd, &ctrl->value, ctrl->id - V4L2_MT9M114_AE_WEIGHT_TABLE_0_0);
     default:
       name = v4l2_ctrl_get_name(ctrl->id);
       if(name == NULL) {
@@ -1349,6 +1589,42 @@ static int mt9m114_s_ctrl(struct v4l2_subdev* sd, struct v4l2_control* ctrl) {
       return mt9m114_s_horizontal_flip(sd, ctrl->value);
     case V4L2_MT9M114_FADE_TO_BLACK:
       return mt9m114_s_fade_to_black(sd, ctrl->value);
+    case V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA:
+      return mt9m114_s_target_average_luma(sd, ctrl->value);
+    case V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA_DARK:
+      return mt9m114_s_target_average_luma_dark(sd, ctrl->value);
+    case V4L2_MT9M114_AE_TARGET_GAIN:
+      return mt9m114_s_target_gain(sd, ctrl->value);
+    case V4L2_MT9M114_AE_MIN_VIRT_GAIN:
+      return mt9m114_s_min_virt_gain(sd, ctrl->value);
+    case V4L2_MT9M114_AE_MAX_VIRT_GAIN:
+      return mt9m114_s_max_virt_gain(sd, ctrl->value);
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_0_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_1_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_2_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_3_4:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_0:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_1:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_2:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_3:
+    case V4L2_MT9M114_AE_WEIGHT_TABLE_4_4:
+      return mt9m114_s_weight_table(sd, ctrl->value, ctrl->id - V4L2_MT9M114_AE_WEIGHT_TABLE_0_0);
     default:
       name = v4l2_ctrl_get_name(ctrl->id);
       if(name == NULL) {

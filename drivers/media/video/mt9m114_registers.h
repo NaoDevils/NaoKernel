@@ -189,7 +189,31 @@
 // AE_Rule Variables -----------------------------------------------------------
 #define VAR_AE_RULE_ALGO                                0xA404
 #define VAR_AE_RULE_AVG_Y_FROM_START                    0xA406
-//... Probably no need
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_0_0                 0xA407
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_0_1                 0xA408
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_0_2                 0xA409
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_0_3                 0xA40A
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_0_4                 0xA40B
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_1_0                 0xA40C
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_1_1                 0xA40D
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_1_2                 0xA40E
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_1_3                 0xA40F
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_1_4                 0xA410
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_2_0                 0xA411
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_2_1                 0xA412
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_2_2                 0xA413
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_2_3                 0xA414
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_2_4                 0xA415
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_3_0                 0xA416
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_3_1                 0xA417
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_3_2                 0xA418
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_3_3                 0xA419
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_3_4                 0xA41A
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_4_0                 0xA41B
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_4_1                 0xA41C
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_4_2                 0xA41D
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_4_3                 0xA41E
+#define VAR_AE_RULE_AE_WEIGHT_TABLE_4_4                 0xA41F
 #define VAR_AE_RULE_AE_ADAPTIVE_STRENGTH                0xA420
 
 // AE_Track Variables ----------------------------------------------------------
