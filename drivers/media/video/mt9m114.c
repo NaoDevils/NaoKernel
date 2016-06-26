@@ -1380,10 +1380,11 @@ static int mt9m114_g_register(struct v4l2_subdev* sd, struct v4l2_dbg_register* 
       return -EINVAL;
   }
   if(ret) {
-    reg->val = val;
-    dprint("Register: 0x%X, size: %u, value: 0x%X.", (u16)reg->reg, (u16)reg->size, (u32)reg->val);
+    dprint("Reading register failed! (0x%X, size: %u, value: 0x%X)", (u16)reg->reg, (u16)reg->size, (u32)reg->val);
     return ret;
   } else {
+    reg->val = val;
+    dprint("Register: 0x%X, size: %u, value: 0x%X.", (u16)reg->reg, (u16)reg->size, (u32)reg->val);
     return 0;
   }
 }
