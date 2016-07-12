@@ -1040,7 +1040,8 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
 			  SDHCI_QUIRK_NO_LED,
 	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
 			  SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 |
-			  SDHCI_QUIRK2_STOP_WITH_TC,
+			  SDHCI_QUIRK2_STOP_WITH_TC |
+			  SDHCI_QUIRK2_NO_1_8_V,
 	.ops		= &sdhci_intel_byt_ops,
 	.priv_size	= sizeof(struct intel_host),
 };
