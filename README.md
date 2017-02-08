@@ -8,6 +8,8 @@ Information about the camera driver
 -----------------------------------
 The camera driver provides some new features compared to the driver from Aldebaran. In addition to that the range of some values changed and the auto white balance is controlled by another ioctl.
 
+The registers for the advanced auto exposure settings were adopted from [another camera manual](http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF). Check out figures 32, 38, 40 and the related sections for more information.
+
 After building the kernel the new driver can be found in `drivers/media/video/mt9m114.ko` and has to be copied to `/lib/modules/2.6.33.9-rt31-aldebaran-rt/kernel/drivers/media/video/mt9m114.ko` on the robot.
 
 A list of the new video controls:
@@ -57,98 +59,134 @@ A list of all supported mage settings:
     <tr>
         <td>backlight compensation</td>
         <td>V4L2_CID_BACKLIGHT_COMPENSATION</td>
-        <td>min 0: max: 4<br/>default: 1</td>
+        <td>min: 0 max: 4<br/>default: 1</td>
         <td>Only changeable while ae is enabled!</td>
     </tr>
     <tr>
         <td>brightness</td>
         <td>V4L2_CID_BRIGHTNESS</td>
-        <td>min 0: max: 255<br/>default: 55</td>
+        <td>min: 0 max: 255<br/>default: 55</td>
         <td>Only changeable while ae is enabled!</td>
     </tr>
     <tr>
         <td>contrast</td>
         <td>V4L2_CID_CONTRAST</td>
-        <td>min 16: max: 64<br/>default: 32</td>
+        <td>min: 16 max: 64<br/>default: 32</td>
         <td>Gradient of the contrast adjustment curve from 0.5 (16) to 2.0 (64)</td>
     </tr>
     <tr>
-        <td>NEW<br/>do an automatic white balance</td>
+        <td>do an automatic white balance</td>
         <td>V4L2_CID_DO_WHITE_BALANCE</td>
-        <td>min 0: max: 1<br/>default: 0</td>
+        <td>min: 0 max: 1<br/>default: 0</td>
         <td>Does an automatic white balance. The new white balance can be read from the white balance temperature.<br/>This ioctl is a button, thus it will always return 0! **Be aware** that Aldebaran uses this ioctl for the white balance temperature.</td>
     </tr>
     <tr>
         <td>exposure time</td>
         <td>V4L2_CID_EXPOSURE</td>
-        <td>min 1: max: 1000<br/>default: 1</td>
+        <td>min: 1 max: 1000<br/>default: 1</td>
         <td>The exposure can be changed only while ae is disabled! A value on one is 100 microseconds of exposure.</td>
     </tr>
     <tr>
         <td>exposure algorithm</td>
         <td>V4L2_CID_EXPOSURE_ALGORITHM</td>
-        <td>min 0: max: 3<br/>default: 1</td>
+        <td>min: 0 max: 3<br/>default: 1</td>
         <td>0: Average scene brightness<br/>1: weighted average scene brightness<br/>2: evaluated average scene brightness with frontlight detection<br/>3: evaluated average scene brightness with backlight detection</td>
     </tr>
     <tr>
         <td>gain</td>
         <td>V4L2_CID_GAIN</td>
-        <td>min 0: max: 255<br/>default: 32</td>
+        <td>min: 0 max: 255<br/>default: 32</td>
         <td>Only changeable while ae is disabled! A value of 32 equals to 1.0 gain.</td>
     </tr>
     <tr>
-        <td>NEW<br/>gamma correction</td>
+        <td>gamma correction</td>
         <td>V4L2_CID_GAMMA</td>
-        <td>min 0: max: 1000<br/>default: 220</td>
+        <td>min: 0 max: 1000<br/>default: 220</td>
         <td>The gamma correction for the display in units multiplied by 100. A value of 220 equals to 2.2 gamma.</td>
     </tr>
     <tr>
         <td>hue</td>
         <td>V4L2_CID_HUE</td>
-        <td>min -22: max: 22<br/>default: 0</td>
+        <td>min: -22 max: 22<br/>default: 0</td>
         <td>Hue correction on degrees.</td>
     </tr>
     <tr>
-        <td>NEW<br/>power line frequency</td>
+        <td>power line frequency</td>
         <td>V4L2_CID_POWER_LINE_FREQUENCY</td>
-        <td>min 1: max: 2<br/>default: 2</td>
+        <td>min: 1 max: 2<br/>default: 2</td>
         <td>1: 50Hz, 2: 60Hz.<br/>The frequeny of the local power line so ae can avoid flicker.</td>
     </tr>
     <tr>
         <td>saturation</td>
         <td>V4L2_CID_SATURATION</td>
-        <td>min 0: max: 255<br/>default: 128</td>
+        <td>min: 0 max: 255<br/>default: 128</td>
         <td>Saturation control for the image. A value of zero results in grayscaled images while values above 128 result in over saturated images.</td>
     </tr>
     <tr>
         <td>sharpness</td>
         <td>V4L2_CID_SHARPNESS</td>
-        <td>min 0: max: 255<br/>default: 128</td>
+        <td>min: 0 max: 255<br/>default: 128</td>
         <td>Sharpness values are limited from 0 to +7. When seting the value tp -7 no sharpness will be applied.</td>
     </tr>
     <tr>
         <td>white balance temperature</td>
         <td>V4L2_CID_WHITE_BALANCE_TEMPERATURE</td>
-        <td>min 2700: max: 6500<br/>default: 6500</td>
+        <td>min: 2700 max: 6500<br/>default: 6500</td>
         <td>The white balance temperature in kelvin. **Be aware** that Aldebaran uses another ioctl for this feature!</td>
     </tr>
     <tr>
         <td>vertical flip</td>
         <td>V4L2_CID_VFLIP</td>
-        <td>min 0: max: 1<br/>default: 0</td>
+        <td>min: 0 max: 1<br/>default: 0</td>
         <td></td>
     </tr>
     <tr>
         <td>horizontal flip</td>
         <td>V4L2_CID_HFLIP</td>
-        <td>min 0: max: 1<br/>default: 0</td>
+        <td>min: 0 max: 1<br/>default: 0</td>
         <td></td>
     </tr>
     <tr>
-        <td>NEW<br/>fade to black</td>
-        <td>V4L2_CID_PRIVATE_BASE</td>
-        <td>min 0: max: 1<br/>default: 1</td>
+        <td>fade to black</td>
+        <td>V4L2_MT9M114_FADE_TO_BLACK (V4L2_CID_PRIVATE_BASE)</td>
+        <td>min: 0 max: 1<br/>default: 1</td>
         <td>0: disable, 1: enable<br/>When enabled the image will fade to black under low light conditions.</td>
+    </tr>
+    <tr>
+        <td>target average luma</td>
+        <td>V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA (V4L2_CID_PRIVATE_BASE+1)</td>
+        <td>min: 0 max: 255<br/>default: 55</td>
+        <td>The brightness target to be maintained by the auto exposure for bright lighting conditions. (<a href="http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF">Figure 38</a>)</td>
+    </tr>
+    <tr>
+        <td>target average luma dark</td>
+        <td>V4L2_MT9M114_AE_TARGET_AVERAGE_LUMA_DARK (V4L2_CID_PRIVATE_BASE+2)</td>
+        <td>min: 0 max: 255<br/>default: 27</td>
+        <td>The brightness target to be maintained by the auto exposure for dark lighting conditions. (<a href="http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF">Figure 38</a>)</td>
+    </tr>
+    <tr>
+        <td>target analog gain</td>
+        <td>V4L2_MT9M114_AE_TARGET_GAIN (V4L2_CID_PRIVATE_BASE+3)</td>
+        <td>min: 0 max: 65535<br/>default: 128</td>
+        <td>The maximum analog gain before reducing the frame rate. (<a href="http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF">Figure 40</a>)</td>
+    </tr>
+    <tr>
+        <td>min. analog gain</td>
+        <td>V4L2_MT9M114_AE_MIN_VIRT_GAIN (V4L2_CID_PRIVATE_BASE+4)</td>
+        <td>min: 0 max: 65535<br/>default: 32</td>
+        <td>The minimum analog gain that the auto exposure is allowed to use. Increasing this value carefully results in shorter exposure times. (<a href="http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF">Figure 40</a>)</td>
+    </tr>
+    <tr>
+        <td>max. analog gain</td>
+        <td>V4L2_MT9M114_AE_MAX_VIRT_GAIN (V4L2_CID_PRIVATE_BASE+5)</td>
+        <td>min: 0 max: 65535<br/>default: 256</td>
+        <td>The maximum analog gain that the auto exposure is allowed to use. (<a href="http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF">Figure 40</a>)</td>
+    </tr>
+    <tr>
+        <td>weighted brightness</td>
+        <td>V4L2_MT9M114_AE_WEIGHT_TABLE_0_0 ... V4L2_MT9M114_AE_WEIGHT_TABLE_4_4 (V4L2_CID_PRIVATE_BASE+6...+30)</td>
+        <td>min: 0 max: 255</td>
+        <td>Requires V4L2_CID_EXPOSURE_ALGORITHM=1!<br>The weight of every 5x5 area to be used for calculating the average brightness of the current scene. (<a href="http://www.onsemi.com/pub_link/Collateral/AND9270-D.PDF">Figure 32</a>)</td>
     </tr>
 </table>
 
