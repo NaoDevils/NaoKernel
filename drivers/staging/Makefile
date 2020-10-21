@@ -53,6 +53,5 @@ obj-$(CONFIG_UWB)		+= uwb/
 obj-$(CONFIG_USB_WUSB)		+= wusbcore/
 obj-$(CONFIG_EXFAT_FS)		+= exfat/
 obj-$(CONFIG_QLGE)		+= qlge/
-obj-$(CONFIG_I2O)		+= i2o/
 obj-$(CONFIG_AL_FASTSERIAL)	+= al_fastserial/
 obj-$(CONFIG_AL_UNICORN)	+= al_unicorn/
