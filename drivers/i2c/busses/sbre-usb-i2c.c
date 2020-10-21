@@ -340,7 +340,7 @@ static int sbre_usb_i2c_probe(struct usb_interface *interface,
 {
 	struct sbre_usb_i2c *dev;
 	int rv = -ENOMEM;
-	u8 infos[USB_READ_FWINFO_LEN];
+	u8* infos;
 
 	dev_dbg(&interface->dev, "probing usb device\n");
 
@@ -366,12 +366,16 @@ static int sbre_usb_i2c_probe(struct usb_interface *interface,
 	         dev->usb_dev->bus->busnum,
 	         dev->usb_dev->devnum);
 
+	infos = kmalloc(USB_READ_FWINFO_LEN, GFP_KERNEL);
+	if(!infos)
+		return -ENOMEM;
+
 	/* retrieve firmware info */
 	rv = usb_control_msg(dev->usb_dev,
 	                     usb_rcvctrlpipe(dev->usb_dev, 0),
 	                     USB_READ_FWINFO_REQ, USB_READ_FWINFO_REQTYPE,
 	                     0, 0,
-	                     infos, sizeof(infos), USB_IO_TIMEOUT_MS);
+	                     infos, USB_READ_FWINFO_LEN, USB_IO_TIMEOUT_MS);
 	if (rv >= 0) {
 		dev_info(&interface->dev,
 		         "SBRE USB-I2C on port %d.%d: '%s'",
@@ -379,6 +383,7 @@ static int sbre_usb_i2c_probe(struct usb_interface *interface,
 		         dev->usb_dev->devnum,
 		         infos);
 	}
+	kfree(infos);
 
 	dev->adapter.dev.parent = &dev->interface->dev;
 

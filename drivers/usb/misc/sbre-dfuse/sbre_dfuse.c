@@ -94,17 +94,23 @@ static const uint32_t sbre_firmware_info_address = 0x08000000 | SBRE_FIRMWARE_IN
 static int dfuse_get_status(struct sbre_dfuse *dev,
                             struct sbre_dfuse_status *status)
 {
-	uint8_t buf[6];
-	int rv;
+	const size_t bufSize = 6;
+	uint8_t* buf;
+	int rv, ret = 0;
+
+	buf = kmalloc(bufSize, GFP_KERNEL);
+	if(!buf)
+		return -ENOMEM;
 
 	rv = usb_control_msg(dev->usb_dev,
 	                     usb_rcvctrlpipe(dev->usb_dev, 0),
 	                     DFU_REQ_GETSTATUS, REQTYPE_RCV,
 	                     0, dev->itf_alt,
-	                     buf, sizeof(buf), USB_IO_TIMEOUT);
-	if (rv != sizeof(buf)) {
+	                     buf, bufSize, USB_IO_TIMEOUT);
+	if (rv != bufSize) {
 		dev_err(&dev->interface->dev, "Cannot get status.");
-		return rv < 0 ? rv : -EREMOTEIO;
+		ret = rv < 0 ? rv : -EREMOTEIO;
+		goto error;
 	}
 
 	/* Parse */
@@ -116,7 +122,10 @@ static int dfuse_get_status(struct sbre_dfuse *dev,
 	/* Directly sleeps here, assures next command is ok */
 	msleep(status->bwPollTimeOut);
 
-	return 0;
+	error:
+	kfree(buf);
+
+	return ret;
 }
 
 static int dfuse_wait_download_end(struct sbre_dfuse *dev,
