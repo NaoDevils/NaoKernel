@@ -3,7 +3,7 @@
 #include <linux/module.h>
 #include <linux/printk.h>
 #include <linux/sysfs.h>
-#include <linux/crypto.h>
+#include <crypto/hash.h>
 #include <linux/scatterlist.h>
 
 #include "DrvOsHdr.h"
@@ -72,32 +72,38 @@ static struct kobj_attribute sc_attrib_robot_type =
 
 static int compute_machine_id(void)
 {
-	struct scatterlist sg;
-	struct hash_desc desc;
-	char buf[HEAD_ID_LEN];
+	struct shash_desc * desc;
+	struct crypto_shash * alg;
+
+	u8 buf[HEAD_ID_LEN];
 	u8 hashval[MD5_SIGNATURE_SIZE];
 	int err, i;
 
 	memcpy(buf, head_id, HEAD_ID_LEN);
 
-	desc.tfm = crypto_alloc_hash("md5", 0, CRYPTO_ALG_ASYNC);
-	if (desc.tfm == NULL)
+	alg = crypto_alloc_shash("md5", 0, 0);
+	if (IS_ERR(alg))
 		return -ENOMEM;
 
-	desc.flags = 0;
-	sg_init_one(&sg, buf, HEAD_ID_LEN);
-
-	err = crypto_hash_digest(&desc, &sg, HEAD_ID_LEN, hashval);
-	if (err) {
-		printk(KERN_ERR "Fail to compute machine id\n");
+	desc = kmalloc(sizeof(struct shash_desc) + crypto_shash_descsize(alg), GFP_KERNEL);
+	if(!desc) {
+		err = -ENOMEM;
 		goto error;
 	}
+	desc->tfm = alg;
 
-	for (i = 0; i < MD5_SIGNATURE_SIZE; i++)
-		sprintf(&sbr_machine_id[2*i], "%02x", hashval[i]);
+	err = crypto_shash_digest(desc, buf, HEAD_ID_LEN, hashval);
+	if (err) {
+		printk(KERN_ERR "Fail to compute machine id\n");
+	}else{
+		for (i = 0; i < MD5_SIGNATURE_SIZE; i++)
+			sprintf(&sbr_machine_id[2*i], "%02x", hashval[i]);
+	}
 
-  error:
-	crypto_free_hash(desc.tfm);
+	kfree(desc);
+
+	error:
+	crypto_free_shash(alg);
 	return err;
 }
 
